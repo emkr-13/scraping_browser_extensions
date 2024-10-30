@@ -1,5 +1,5 @@
-const GA_ENDPOINT = 'https://www.google-analytics.com/mp/collect';
-const GA_DEBUG_ENDPOINT = 'https://www.google-analytics.com/debug/mp/collect';
+const GA_ENDPOINT = "https://www.google-analytics.com/mp/collect";
+const GA_DEBUG_ENDPOINT = "https://www.google-analytics.com/debug/mp/collect";
 
 // Get via https://developers.google.com/analytics/devguides/collection/protocol/ga4/sending-events?client_type=gtag#recommended_parameters_for_reports
 const MEASUREMENT_ID = `G-G7PJ1V076F`;
@@ -19,11 +19,11 @@ export class Analytics {
   // Stores client id in local storage to keep the same client id as long as
   // the extension is installed.
   async getOrCreateClientId() {
-    let clientId = localStorage.getItem('clientId');
+    let clientId = localStorage.getItem("clientId");
     if (!clientId) {
       // Generate a unique client ID, the actual value is not relevant
       clientId = self.crypto.randomUUID();
-      localStorage.setItem('clientId', clientId);
+      localStorage.setItem("clientId", clientId);
     }
     return clientId;
   }
@@ -33,7 +33,7 @@ export class Analytics {
   async getOrCreateSessionId() {
     // Use storage.session because it is only in memory
     // let { sessionData } = await chrome.storage.session.get('sessionData');
-    let sessionData = JSON.parse(sessionStorage.getItem('sessionData'));
+    let sessionData = JSON.parse(sessionStorage.getItem("sessionData"));
     const currentTimeInMs = Date.now();
     // Check if session exists and is still valid
     if (sessionData && sessionData.timestamp) {
@@ -47,17 +47,17 @@ export class Analytics {
         // Update timestamp to keep session alive
         sessionData.timestamp = currentTimeInMs;
         // await chrome.storage.session.set({ sessionData });
-        sessionStorage.setItem('sessionData', JSON.stringify(sessionData));
+        sessionStorage.setItem("sessionData", JSON.stringify(sessionData));
       }
     }
     if (!sessionData) {
       // Create and store a new session
       sessionData = {
         session_id: currentTimeInMs.toString(),
-        timestamp: currentTimeInMs.toString()
+        timestamp: currentTimeInMs.toString(),
       };
       // await chrome.storage.session.set({ sessionData });
-      sessionStorage.setItem('sessionData', JSON.stringify(sessionData));
+      sessionStorage.setItem("sessionData", JSON.stringify(sessionData));
     }
     return sessionData.session_id;
   }
@@ -79,16 +79,16 @@ export class Analytics {
           this.debug ? GA_DEBUG_ENDPOINT : GA_ENDPOINT
         }?measurement_id=${MEASUREMENT_ID}&api_secret=${API_SECRET}`,
         {
-          method: 'POST',
+          method: "POST",
           body: JSON.stringify({
             client_id: await this.getOrCreateClientId(),
             events: [
               {
                 name,
-                params
-              }
-            ]
-          })
+                params,
+              },
+            ],
+          }),
         }
       );
       if (!this.debug) {
@@ -96,16 +96,16 @@ export class Analytics {
       }
       console.log(await response.text());
     } catch (e) {
-      console.error('Google Analytics request failed with an exception', e);
+      console.error("Google Analytics request failed with an exception", e);
     }
   }
 
   // Fire a page view event.
   async firePageViewEvent(pageTitle, pageLocation, additionalParams = {}) {
-    return this.fireEvent('page_view', {
+    return this.fireEvent("page_view", {
       page_title: pageTitle,
       page_location: pageLocation,
-      ...additionalParams
+      ...additionalParams,
     });
   }
 
@@ -113,9 +113,9 @@ export class Analytics {
   async fireErrorEvent(error, additionalParams = {}) {
     // Note: 'error' is a reserved event name and cannot be used
     // see https://developers.google.com/analytics/devguides/collection/protocol/ga4/reference?client_type=gtag#reserved_names
-    return this.fireEvent('extension_error', {
+    return this.fireEvent("extension_error", {
       ...error,
-      ...additionalParams
+      ...additionalParams,
     });
   }
 }
